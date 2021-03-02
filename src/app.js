@@ -1,6 +1,6 @@
 import React from "react";
-import { Hello } from "./components/hello.tsx";
-import {Header} from './components/header.js'
+import { Hello } from "./components/hello";
+import {Header} from './components/header';
 
 function App() {
   return (
