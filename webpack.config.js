@@ -15,13 +15,15 @@
 // css-loader interprets @import and @url() and resolves them.
 // mini-css-extract-plugin extracts our CSS out of the JavaScript bundle into a separate file, essential for production builds.
 // file-loader resolves your imports and copies the file to the output directory (usually with a randomly generated name, for cache busting)
-// image-webpack-loader processes the images using another package called imagemin
+// image-minimizer-webpack-plugin processes the images using another package called imagemin
+// Recommended imagemin plugins for lossless optimization: 'npm install imagemin-gifsicle imagemin-jpegtran imagemin-optipng imagemin-svgo --save-dev'
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const path = require("path");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const ImageMinimizerPlugin = require('image-minimizer-webpack-plugin');
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -42,6 +44,27 @@ module.exports = {
     hot: true,
   },
   plugins: [
+    new ImageMinimizerPlugin({
+      minimizerOptions: {
+        // Lossless optimization with custom option
+        // Feel free to experiment with options for better result for you
+        plugins: [
+          ["gifsicle", { interlaced: true }],
+          ["jpegtran", { progressive: true }],
+          ["optipng", { optimizationLevel: 5 }],
+          [
+            "svgo",
+            {
+              plugins: [
+                {
+                  removeViewBox: false,
+                },
+              ],
+            },
+          ],
+        ],
+      },
+    }),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: "./src/index.html",
@@ -56,6 +79,10 @@ module.exports = {
   ].filter(Boolean),
   module: {
     rules: [
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        type: 'asset/resource'
+      },
       {
         test: /\.[jt]sx?$/,
         exclude: /node_modules/,
@@ -129,6 +156,6 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [".js", ".jsx", ".ts", ".tsx", ".scss"],
+    extensions: [".js", ".jsx", ".ts", ".tsx", ".scss",  '.gif', '.png', '.jpg', '.jpeg', '.svg'],
   },
 };
